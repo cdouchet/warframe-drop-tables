@@ -16,6 +16,6 @@ app.get("/droptables", (req, res) => {
 app.use(express.static("web"));
 app.use(express.static("wasm_lib/pkg"));
 
-app.listen(3000, () => {
+app.listen(8769, () => {
   console.log("Starting Warframe Drop Tables");
 });
