@@ -1,17 +1,15 @@
 use std::str::FromStr;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
-
-use crate::console_log;
 
 use super::rarity::Rarity;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Item {
-    name: String,
-    rarity: Rarity,
-    drop_chance: f32,
+    pub name: String,
+    pub rarity: Rarity,
+    pub drop_chance: f32,
 }
 
 impl Item {

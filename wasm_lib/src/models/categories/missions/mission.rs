@@ -1,13 +1,13 @@
 use std::str::FromStr;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
 
-use crate::{console_log, models::item::Item};
+use crate::models::item::Item;
 
 use super::rotations::Rotations;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub enum Mission {
     Rotation { name: String, rotations: Rotations },
     Classic { name: String, items: Vec<Item> },

@@ -52,24 +52,6 @@ pub fn parse_warframe_data(data: &str) -> JsValue {
         }
     };
 
-    // let tables_content = body
-    //     .split("</table>")
-    //     .map(|e| {
-    //         let mut splitted = e.split("<table>");
-    //         let el = &splitted.nth(1);
-    //         console_log!(
-    //             "Exists Len: {}",
-    //             splitted.clone().collect::<Vec<&str>>().len()
-    //         );
-    //         let exists = el.is_some();
-    //         console_log!("Exists: {}", &exists);
-    //         // if exists {
-    //         //     console_log!("Exists data: {}", el.unwrap());
-    //         // }
-    //         el.unwrap_or_else(|| splitted.nth(0).unwrap()).to_string()
-    //     })
-    //     .collect::<Vec<String>>();
-
     let tables_content = body
         .split("</table>")
         .map(|e| e.to_string())
@@ -84,26 +66,15 @@ pub fn parse_warframe_data(data: &str) -> JsValue {
         })
         .collect::<Vec<String>>();
 
-    // for (i, el) in tables_content.iter().enumerate() {
-    //     console_log!("Index is : {}", i);
-    //     if i % 2 == 1 {
-    //         console_log!("{}", el);
-    //     }
-    // }
-
     let missions = tables_content.first().unwrap();
     let missions = Missions::parse(missions);
     serde_wasm_bindgen::to_value(&missions).expect_throw("Failed to send final data")
+}
 
-    // loop {
-    //     match reader.read_event() {
-    //         Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
-    //         Ok(Event::Eof) => break,
-    //         Ok(Event::Start(e)) => {
-    //             let name = str::from_utf8(e.name().0).unwrap();
-    //             console_log!("{}", name);
-    //         }
-    //         _ => (),
-    //     }
-    // }
+#[wasm_bindgen]
+pub fn filter_warframe_missions(missions: JsValue, filter: &str) -> JsValue {
+    let missions: Missions =
+        serde_wasm_bindgen::from_value(missions).expect_throw("Expected an array of missions");
+    let result = &missions.filter(&filter.to_lowercase());
+    serde_wasm_bindgen::to_value(&result).expect_throw("Failed to send filtered data")
 }

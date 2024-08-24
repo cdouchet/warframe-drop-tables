@@ -1,9 +1,9 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::throw_str;
 
 use crate::models::item::Item;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Rotations {
     pub a: Vec<Item>,
     pub b: Vec<Item>,
