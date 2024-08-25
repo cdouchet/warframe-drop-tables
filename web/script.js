@@ -20,8 +20,8 @@ const createBox = (name) => {
 };
 
 const addMission = (element, inputText) => {
+  const fragment = document.createDocumentFragment();
   const name = element.name;
-  const wrapper = document.getElementById("wrapper");
   let box = createBox(name);
   if (element.mission_type == 0) {
     box = addRotations(box, element, inputText);
@@ -29,7 +29,8 @@ const addMission = (element, inputText) => {
     box = addClassic(box, element, inputText);
   }
 
-  wrapper.appendChild(box);
+  fragment.appendChild(box);
+  document.getElementById("wrapper").appendChild(fragment);
 };
 
 const addRotation = (rotationKey, box) => {
@@ -98,8 +99,8 @@ const addClassic = (box, el, inputText) => {
 };
 
 const addRelic = (element, inputText) => {
+  const fragment = document.createDocumentFragment();
   const name = element.name;
-  const wrapper = document.getElementById("wrapper");
   const box = createBox(name);
   for (const item of element.items) {
     const itemWrapper = document.createElement("div");
@@ -117,7 +118,8 @@ const addRelic = (element, inputText) => {
     itemWrapper.appendChild(itemChance);
     box.appendChild(itemWrapper);
   }
-  wrapper.appendChild(box);
+  fragment.appendChild(box);
+  document.getElementById("wrapper").appendChild(fragment);
 };
 
 const showData = (data, inputText) => {
@@ -135,18 +137,29 @@ const showData = (data, inputText) => {
 
 const searchInput = document.getElementById("input_search");
 
+const debounce = (func, delay) => {
+  let debounceTimer;
+  return function (...args) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => func.apply(this, args), delay);
+  };
+};
+
 init().then(() => {
   getWarframeData().then((data) => {
     const result = new WarframeData(data);
     showData(result, "NOTHING");
-    searchInput.addEventListener("input", (e) => {
-      const inputText = e.target.value;
-      if (inputText == "" || inputText == null) {
-        showData(result, "NOTHING");
-        return;
-      }
-      const filteredResult = result.filter(inputText.toLowerCase());
-      showData(filteredResult, inputText);
-    });
+    searchInput.addEventListener(
+      "input",
+      debounce((e) => {
+        const inputText = e.target.value;
+        if (inputText == "" || inputText == null) {
+          showData(result, "NOTHING");
+          return;
+        }
+        const filteredResult = result.filter(inputText.toLowerCase());
+        showData(filteredResult, inputText);
+      }, 10),
+    );
   });
 });
