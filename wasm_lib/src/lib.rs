@@ -2,12 +2,7 @@
 #![feature(let_chains)]
 use core::str;
 
-use models::categories::missions::Missions;
-use quick_xml::{
-    events::{BytesStart, Event},
-    Reader,
-};
-use wasm_bindgen::{prelude::*, throw_str};
+use wasm_bindgen::prelude::*;
 
 pub mod macros;
 pub mod models;
@@ -36,45 +31,51 @@ pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
 }
 
-#[wasm_bindgen]
-pub fn parse_warframe_data(data: &str) -> JsValue {
-    let mut reader = Reader::from_str(data);
-    reader.config_mut().trim_text(true);
+// #[wasm_bindgen]
+// pub fn parse_warframe_data(data: &str) -> JsValue {
+//     let spl = data.split("</ul>").collect::<Vec<&str>>();
 
-    let spl = data.split("</ul>").collect::<Vec<&str>>();
+//     let body = match spl.iter().nth(2) {
+//         Some(body) => body,
+//         None => {
+//             console_log!("Big bug");
+//             warframe_parse_error!();
+//             throw_str("Failed to parse warframe base data");
+//         }
+//     };
 
-    let body = match spl.iter().nth(2) {
-        Some(body) => body,
-        None => {
-            console_log!("Big bug");
-            warframe_parse_error!();
-            throw_str("Failed to parse warframe base data");
-        }
-    };
+//     let tables_content = body
+//         .split("</table>")
+//         .map(|e| e.to_string())
+//         .collect::<Vec<String>>();
 
-    let tables_content = body
-        .split("</table>")
-        .map(|e| e.to_string())
-        .collect::<Vec<String>>();
+//     let tables_content = tables_content
+//         .iter()
+//         .map(|e| {
+//             let spl = e.split("<table>").collect::<Vec<&str>>();
+//             let el = spl.iter().nth(1);
+//             el.unwrap_or(spl.iter().nth(0).unwrap()).to_string()
+//         })
+//         .collect::<Vec<String>>();
 
-    let tables_content = tables_content
-        .iter()
-        .map(|e| {
-            let spl = e.split("<table>").collect::<Vec<&str>>();
-            let el = spl.iter().nth(1);
-            el.unwrap_or(spl.iter().nth(0).unwrap()).to_string()
-        })
-        .collect::<Vec<String>>();
+//     let missions = tables_content
+//         .first()
+//         .expect_throw("Failed to get raw mission data");
+//     let missions = Missions::parse(missions);
+//     let relics = tables_content
+//         .get(1)
+//         .expect_throw("Failed to get raw relics data");
+//     let relics = Relics::parse(relics);
 
-    let missions = tables_content.first().unwrap();
-    let missions = Missions::parse(missions);
-    serde_wasm_bindgen::to_value(&missions).expect_throw("Failed to send final data")
-}
+//     let warframe_data = WarframeData { missions, relics };
 
-#[wasm_bindgen]
-pub fn filter_warframe_missions(missions: JsValue, filter: &str) -> JsValue {
-    let missions: Missions =
-        serde_wasm_bindgen::from_value(missions).expect_throw("Expected an array of missions");
-    let result = &missions.filter(&filter.to_lowercase());
-    serde_wasm_bindgen::to_value(&result).expect_throw("Failed to send filtered data")
-}
+//     serde_wasm_bindgen::to_value(&warframe_data).expect_throw("Failed to send final data")
+// }
+
+// #[wasm_bindgen]
+// pub fn filter_warframe_missions(missions: JsValue, filter: &str) -> JsValue {
+//     let warframe_data: WarframeData =
+//         serde_wasm_bindgen::from_value(missions).expect_throw("Expected an array of missions");
+//     let result = &missions.filter(&filter.to_lowercase());
+//     serde_wasm_bindgen::to_value(&result).expect_throw("Failed to send filtered data")
+// }

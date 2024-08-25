@@ -2,7 +2,10 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum Rarity {
     VeryCommon,
     Common,

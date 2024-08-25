@@ -1,21 +1,25 @@
 use core::str;
 
-use mission::Mission;
-use quick_xml::{events::Event, Reader};
-use rotations::Rotations;
-use serde::{Deserialize, Serialize};
+use mission::{Mission, MissionType};
 
-use crate::{models::item::Item, parse_xml_name};
+use crate::models::item::Item;
 
 pub mod mission;
 pub mod rotations;
 
 use wasm_bindgen::prelude::*;
 
-#[derive(Serialize, Deserialize)]
-pub struct Missions(pub Vec<Mission>);
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct Missions {
+    inner: Vec<Mission>,
+}
 
 impl Missions {
+    pub fn inner(&self) -> Vec<Mission> {
+        self.inner.clone()
+    }
+
     pub fn parse(input: &str) -> Self {
         let mut input = String::from(input);
         input.remove_matches("<tr>");
@@ -38,46 +42,57 @@ impl Missions {
             missions.push(Mission::parse(&raw_mission));
         }
 
-        Self(missions)
+        Self { inner: missions }
     }
 
-    pub fn filter(&self, f: &str) -> Vec<&Mission> {
+    pub fn filter(&self, f: &str) -> Missions {
         let mut result = self
-            .0
+            .inner
             .iter()
-            .filter(|e| match e {
-                Mission::Classic { name, items } => items
+            .filter(|e| match e.mission_type() {
+                MissionType::Classic => e
+                    .items()
                     .iter()
-                    .any(|item| item.name.to_lowercase().contains(f)),
-                Mission::Rotation { name, rotations } => rotations
-                    .a
-                    .iter()
-                    .chain(rotations.b.iter())
-                    .chain(rotations.c.iter())
-                    .any(|item| item.name.to_lowercase().contains(f)),
+                    .any(|item| item.name().to_lowercase().contains(f)),
+                MissionType::Rotation => {
+                    let rotations = e.rotations();
+                    rotations
+                        .a()
+                        .iter()
+                        .chain(rotations.b().iter())
+                        .chain(rotations.c().iter())
+                        .any(|item| item.name().to_lowercase().contains(f))
+                }
             })
-            .collect::<Vec<&Mission>>();
+            .map(|e| e.clone())
+            .collect::<Vec<Mission>>();
         result.sort_by(|a, b| {
             let item_a = find_first_item(a, f);
             let item_b = find_first_item(b, f);
-            item_b.drop_chance.total_cmp(&item_a.drop_chance)
+            item_b.drop_chance().total_cmp(&item_a.drop_chance())
         });
-        result
+        Missions { inner: result }
     }
 }
 
-fn find_first_item<'a>(mission: &&'a Mission, f: &str) -> &'a Item {
-    match mission {
-        Mission::Classic { name, items } => items
+fn find_first_item<'a>(mission: &'a Mission, f: &str) -> Item {
+    match mission.mission_type() {
+        MissionType::Classic => mission
+            .items()
             .iter()
-            .find(|e| e.name.to_lowercase().contains(f))
-            .expect_throw("Fail"),
-        Mission::Rotation { name, rotations } => rotations
-            .a
-            .iter()
-            .chain(rotations.b.iter())
-            .chain(rotations.c.iter())
-            .find(|e| e.name.to_lowercase().contains(f))
-            .expect_throw("Failed"),
+            .find(|e| e.name().to_lowercase().contains(f))
+            .expect_throw("Failed")
+            .clone(),
+        MissionType::Rotation => {
+            let rotations = mission.rotations();
+            rotations
+                .a()
+                .iter()
+                .chain(rotations.b().iter())
+                .chain(rotations.c().iter())
+                .find(|e| e.name().to_lowercase().contains(f))
+                .expect_throw("Fail")
+                .clone()
+        }
     }
 }

@@ -1,15 +1,34 @@
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::{throw_str, UnwrapThrowExt};
+use wasm_bindgen::{prelude::*, throw_str, UnwrapThrowExt};
 
 use super::rarity::Rarity;
 
-#[derive(Serialize, Deserialize)]
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Item {
-    pub name: String,
-    pub rarity: Rarity,
-    pub drop_chance: f32,
+    name: String,
+    rarity: Rarity,
+    drop_chance: f32,
+}
+
+#[wasm_bindgen]
+impl Item {
+    #[wasm_bindgen(getter)]
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn rarity(&self) -> Rarity {
+        self.rarity.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn drop_chance(&self) -> f32 {
+        self.drop_chance
+    }
 }
 
 impl Item {

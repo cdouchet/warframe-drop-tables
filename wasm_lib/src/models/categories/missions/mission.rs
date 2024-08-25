@@ -1,16 +1,55 @@
-use std::str::FromStr;
-
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::{throw_str, UnwrapThrowExt};
+use wasm_bindgen::{prelude::*, throw_str, UnwrapThrowExt};
 
 use crate::models::item::Item;
 
 use super::rotations::Rotations;
 
-#[derive(Serialize, Deserialize)]
-pub enum Mission {
-    Rotation { name: String, rotations: Rotations },
-    Classic { name: String, items: Vec<Item> },
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize, Clone)]
+pub enum MissionType {
+    Rotation,
+    Classic,
+    // Rotation { name: String, rotations: Rotations },
+    // Classic { name: String, items: Vec<Item> },
+}
+
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct Mission {
+    mission_type: MissionType,
+    name: String,
+    rotation_data: Option<Rotations>,
+    classic_data: Option<Vec<Item>>,
+}
+
+#[wasm_bindgen]
+impl Mission {
+    /// Get classic mission data. Panics if mission type is Rotations
+    #[wasm_bindgen(getter)]
+    pub fn items(&self) -> Vec<Item> {
+        self.classic_data
+            .clone()
+            .expect_throw("Unwraped classic data on a rotation mission")
+    }
+
+    /// Get rotations mission data. Panics if mission type is classic
+    #[wasm_bindgen(getter)]
+    pub fn rotations(&self) -> Rotations {
+        self.rotation_data
+            .clone()
+            .expect_throw("Unwraped rotations data on a classic mission")
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn mission_type(&self) -> MissionType {
+        self.mission_type.clone()
+    }
 }
 
 impl Mission {
@@ -53,9 +92,11 @@ impl Mission {
                 counter += 1;
             }
         }
-        Self::Rotation {
+        Self {
+            mission_type: MissionType::Rotation,
             name: name.to_string(),
-            rotations: Rotations { a, b, c },
+            classic_data: None,
+            rotation_data: Some(Rotations::new(a, b, c)),
         }
     }
 
@@ -79,9 +120,11 @@ impl Mission {
         //     let raw_chance = spl.get(1).expect_throw("Failed to parse item chance");
         //     items.push(Item::from_name_and_chance(raw_name, raw_chance));
         // }
-        Self::Classic {
+        Self {
+            mission_type: MissionType::Classic,
             name: name.to_string(),
-            items,
+            rotation_data: None,
+            classic_data: Some(items),
         }
     }
 
