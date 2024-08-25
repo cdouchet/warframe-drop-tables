@@ -159,7 +159,7 @@ init().then(() => {
         }
         const filteredResult = result.filter(inputText.toLowerCase());
         showData(filteredResult, inputText);
-      }, 30),
+      }, 150),
     );
   });
 });
