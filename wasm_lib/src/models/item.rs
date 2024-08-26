@@ -70,4 +70,19 @@ impl Item {
             drop_chance: chance,
         }
     }
+
+    const RECONSTRUCTION_NAMES: [&str; 2] = ["Sevago", "Li"];
+
+    pub fn reconstruct_item_name(&mut self) {
+        let el = Item::RECONSTRUCTION_NAMES
+            .iter()
+            .find(|e| self.name.contains(*e));
+        if el.is_some() {
+            let el = el.expect_throw("Should have not throw");
+            let idx = self.name.find(el).expect_throw("Should have not throw") + el.len();
+            let (first, last) = self.name.split_at(idx);
+            let result = format!("{}{}{}", first, "th", last);
+            self.name = result;
+        }
+    }
 }

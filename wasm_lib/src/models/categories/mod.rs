@@ -50,7 +50,9 @@ impl WarframeData {
             .get(1)
             .expect_throw("Failed to get raw relics data");
         let relics = Relics::parse(relics);
-        WarframeData { missions, relics }
+        let mut warframe_data = WarframeData { missions, relics };
+        warframe_data.reconstruct_missing_names();
+        warframe_data
     }
 
     #[wasm_bindgen]
@@ -78,5 +80,12 @@ impl WarframeData {
     #[wasm_bindgen(setter)]
     pub fn set_relics(&mut self, relics: Relics) {
         self.relics = relics;
+    }
+}
+
+impl WarframeData {
+    fn reconstruct_missing_names(&mut self) {
+        self.missions.reconstruct_missing_names();
+        self.relics.reconstruct_item_name();
     }
 }

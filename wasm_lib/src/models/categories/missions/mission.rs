@@ -147,4 +147,27 @@ impl Mission {
             false => Self::parse_classic(spl),
         }
     }
+
+    pub fn reconstruct_missing_names(&mut self) {
+        match self.mission_type {
+            MissionType::Classic => {
+                if let Some(ref mut data) = self.classic_data {
+                    for item in data {
+                        (*item).reconstruct_item_name();
+                    }
+                }
+                // for data in self
+                //     .classic_data
+                //     .expect_throw("Failed to unwrap classic data in name reconstruction")
+                // {
+                //     data.reconstruct_item_name();
+                // }
+            }
+            MissionType::Rotation => {
+                if let Some(ref mut rotations) = self.rotation_data {
+                    rotations.reconstruct_item_name();
+                }
+            }
+        }
+    }
 }

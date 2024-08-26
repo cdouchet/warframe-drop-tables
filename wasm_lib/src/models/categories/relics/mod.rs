@@ -54,4 +54,10 @@ impl Relics {
             .collect::<Vec<Relic>>();
         Relics { inner: result }
     }
+
+    pub fn reconstruct_item_name(&mut self) {
+        self.inner.iter_mut().for_each(|relic| {
+            relic.reconstruct_item_name();
+        })
+    }
 }

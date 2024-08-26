@@ -20,6 +20,12 @@ impl Missions {
         self.inner.clone()
     }
 
+    pub fn reconstruct_missing_names(&mut self) {
+        self.inner.iter_mut().for_each(|mission| {
+            mission.reconstruct_missing_names();
+        });
+    }
+
     pub fn parse(input: &str) -> Self {
         let mut input = String::from(input);
         input.remove_matches("<tr>");

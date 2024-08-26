@@ -44,4 +44,14 @@ impl Rotations {
         }
         .to_string()
     }
+
+    pub fn reconstruct_item_name(&mut self) {
+        self.a
+            .iter_mut()
+            .chain(self.b.iter_mut())
+            .chain(self.c.iter_mut())
+            .for_each(|e| {
+                e.reconstruct_item_name();
+            });
+    }
 }

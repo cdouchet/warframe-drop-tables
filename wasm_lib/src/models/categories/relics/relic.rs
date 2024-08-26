@@ -50,4 +50,10 @@ impl Relic {
             items,
         }
     }
+
+    pub fn reconstruct_item_name(&mut self) {
+        self.items.iter_mut().for_each(|e| {
+            e.reconstruct_item_name();
+        })
+    }
 }
